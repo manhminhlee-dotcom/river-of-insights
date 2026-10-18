@@ -82,6 +82,7 @@ export const ChapterPage: React.FC<ChapterPageProps> = ({ slug }) => {
     if (b.type === 'tabs') return 'Interactive Analysis';
     if (b.type === 'accordion') return 'In-Depth Inquiry';
     if (b.type === 'numberedCards') return 'Core Pillars';
+    if (b.type === 'featureTriptych') return (b as any).title || 'Analytics Features';
     if (b.type === 'twoColumn') return (b as any).left?.title || 'Comparative Study';
     if (b.type === 'cardGrid' || b.type === 'filterGrid') return 'Case Catalog';
     if (b.type === 'callout') return (b as any).title || 'Executive Advisory';

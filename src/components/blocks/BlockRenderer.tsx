@@ -19,6 +19,7 @@ import {
   FilterGridBlock,
   ImageBlock,
   CalloutBlock,
+  FeatureTriptychBlock,
   DividerBlock,
 } from '../../types';
 import {
@@ -27,10 +28,13 @@ import {
   AlertTriangle,
   Info,
   ArrowRight,
+  ArrowDownRight,
+  ArrowUpRight,
   Sparkles,
   BookOpen,
   Award,
 } from 'lucide-react';
+import { Spark } from '../common/Glyphs';
 import {
   EdHero, EdStory, EdDefinition, EdTabs, EdComparison, EdChecklist, EdQuote,
   EdDuo, EdQuestions, EdCallout, EdTimeline, EdFlow, EdBigNumber, EdAccordion,
@@ -119,7 +123,13 @@ export const SingleBlock: React.FC<{ block: ContentBlock; isEditable?: boolean }
     case 'accordion':
       return <EdAccordion block={block} />;
     case 'numberedCards':
-      return <EdQuestions block={block} />;
+      return block.id === 'c8-numbered-questions' ? (
+        <C8NumberedQuestions block={block} />
+      ) : (
+        <EdQuestions block={block} />
+      );
+    case 'featureTriptych':
+      return <FeatureTriptych block={block as FeatureTriptychBlock} />;
     case 'twoColumn':
       return <EdDuo block={block} renderBlock={(b) => <SingleBlock block={b} />} />;
     case 'comparisonTable':
@@ -471,6 +481,225 @@ const RenderAccordion: React.FC<{ block: AccordionBlock }> = ({ block }) => {
         );
       })}
     </div>
+  );
+};
+
+const TONES_TRIPTYCH = [
+  { number: '#163C3A', tint: '#EEF3F1' },
+  { number: '#2F6F8F', tint: '#EEF4F7' },
+  { number: '#85590A', tint: '#FAF6EE' },
+];
+
+export const FeatureTriptych: React.FC<{ block: FeatureTriptychBlock }> = ({ block }) => {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const activeFeature = block.features[selectedIndex];
+
+  return (
+    <section aria-labelledby={`${block.id}-heading`} className="mx-auto max-w-5xl my-16 sm:my-20">
+      <header className="max-w-3xl mb-8 sm:mb-10">
+        <h2 id={`${block.id}-heading`} className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#163C3A]">
+          {block.title}
+        </h2>
+        {block.introduction && (
+          <p className="mt-4 text-[#4A5568] text-base leading-relaxed font-sans">
+            {block.introduction}
+          </p>
+        )}
+      </header>
+      <ol className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 list-none p-0" aria-label="Analytics features">
+        {block.features.map((feature, idx) => {
+          const tone = TONES_TRIPTYCH[idx % TONES_TRIPTYCH.length];
+          const isSelected = selectedIndex === idx;
+          return (
+            <li key={feature.number} className="h-full min-w-0">
+              <button
+                type="button"
+                aria-expanded={isSelected}
+                aria-controls={`${block.id}-feature-detail`}
+                onClick={() => setSelectedIndex(idx)}
+                className={`group w-full h-full min-h-32 rounded-2xl border p-5 sm:p-6 text-left transition-all duration-300 motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2F6F8F] cursor-pointer ${
+                  isSelected
+                    ? 'ring-1 ring-[#C99A4B]/35 shadow-[0_2px_8px_rgba(22,60,58,0.12),0_12px_28px_-4px_rgba(22,60,58,0.2),0_22px_44px_-12px_rgba(22,60,58,0.3)] -translate-y-1'
+                    : 'shadow-[0_1px_3px_rgba(22,60,58,0.05),0_6px_18px_-2px_rgba(22,60,58,0.1),0_16px_32px_-4px_rgba(22,60,58,0.06)] hover:-translate-y-1 hover:shadow-[0_3px_10px_rgba(22,60,58,0.1),0_16px_32px_-4px_rgba(22,60,58,0.18),0_24px_42px_-10px_rgba(22,60,58,0.16)]'
+                }`}
+                style={{
+                  borderColor: isSelected ? '#C99A4B' : 'rgba(22, 60, 58, 0.14)',
+                  background: isSelected ? 'linear-gradient(145deg, #163C3A 0%, #24596F 100%)' : '#FFFFFF',
+                }}
+              >
+                <span className="flex items-start justify-between gap-3">
+                  <span className="flex items-center gap-3">
+                    <span
+                      aria-hidden="true"
+                      className="font-serif text-3xl leading-none"
+                      style={{ color: isSelected ? '#E6CBA6' : tone.number }}
+                    >
+                      {feature.number}
+                    </span>
+                    <span className={`text-lg font-serif font-medium ${isSelected ? 'text-white' : 'text-[#163C3A]'}`}>
+                      {feature.title}
+                    </span>
+                  </span>
+                  <ArrowDownRight
+                    aria-hidden="true"
+                    className={`mt-1 h-5 w-5 shrink-0 transition-transform ${isSelected ? 'rotate-90' : 'group-hover:translate-x-0.5 group-hover:translate-y-0.5'}`}
+                    style={{ color: isSelected ? '#E6CBA6' : tone.number }}
+                  />
+                </span>
+                <span
+                  className="mt-4 flex items-center gap-2 text-xs uppercase tracking-wider font-semibold font-sans"
+                  style={{ color: isSelected ? '#E6CBA6' : tone.number }}
+                >
+                  {isSelected ? (
+                    <>
+                      <Spark className="h-4 w-4" /> Selected
+                    </>
+                  ) : (
+                    'Explore feature'
+                  )}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+      {activeFeature && (
+        <div
+          id={`${block.id}-feature-detail`}
+          role="region"
+          aria-live="polite"
+          aria-labelledby={`${block.id}-feature-title`}
+          className="relative mt-4 overflow-hidden rounded-2xl border border-[#163C3A]/14 bg-gradient-to-br from-[#F7FAF9] via-white to-[#EEF4F7] p-6 sm:p-9 shadow-[0_1px_3px_rgba(22,60,58,0.05),0_8px_20px_-2px_rgba(22,60,58,0.12),0_18px_36px_-6px_rgba(22,60,58,0.1)] animate-memory"
+        >
+          <span
+            aria-hidden="true"
+            className="absolute -right-2 -top-8 font-serif text-[10rem] leading-none text-[#2F6F8F] opacity-[0.06] select-none pointer-events-none"
+          >
+            {activeFeature.number}
+          </span>
+          <div className="relative max-w-3xl border-l-2 border-[#C99A4B] pl-5 sm:pl-7">
+            <p className="text-xs uppercase tracking-wider font-semibold text-[#24596F] font-sans">
+              Feature {activeFeature.number}
+            </p>
+            <h3 id={`${block.id}-feature-title`} className="text-xl sm:text-2xl font-serif mt-2 text-[#163C3A] font-normal">
+              {activeFeature.title}
+            </h3>
+            <p className="mt-3 text-[#4A5568] leading-relaxed font-sans text-base">
+              {activeFeature.description}
+            </p>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+};
+
+const TONES_QUESTIONS = [
+  { color: '#163C3A', tint: '#EEF3F1' },
+  { color: '#2F6F8F', tint: '#EEF4F7' },
+  { color: '#85590A', tint: '#FAF6EE' },
+];
+
+export const C8NumberedQuestions: React.FC<{ block: NumberedCardsBlock }> = ({ block }) => {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const activeCard = block.cards[selectedIndex];
+
+  return (
+    <section aria-labelledby={`${block.id}-heading`} className="mx-auto max-w-5xl my-16 sm:my-20">
+      <header className="mb-7 sm:mb-9">
+        <p className="text-xs uppercase tracking-wider font-semibold text-[#24596F] font-sans">
+          A useful analytics conversation
+        </p>
+        <h2 id={`${block.id}-heading`} className="text-2xl sm:text-3xl md:text-4xl font-serif mt-2 text-[#163C3A]">
+          Three questions to guide the analysis
+        </h2>
+        <p className="mt-3 text-[#718096] text-base font-sans">
+          Choose a question to explore what it reveals.
+        </p>
+      </header>
+      <ol className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 list-none p-0" aria-label="Three key questions">
+        {block.cards.map((card, idx) => {
+          const tone = TONES_QUESTIONS[idx % TONES_QUESTIONS.length];
+          const isSelected = idx === selectedIndex;
+          return (
+            <li key={card.number} className="h-full">
+              <button
+                type="button"
+                aria-expanded={isSelected}
+                aria-controls={`${block.id}-answer`}
+                onClick={() => setSelectedIndex(idx)}
+                className={`group relative flex min-h-36 w-full flex-col justify-between overflow-hidden rounded-2xl border p-5 sm:p-6 text-left transition-all duration-300 motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2F6F8F] cursor-pointer ${
+                  isSelected
+                    ? 'ring-1 ring-[#C99A4B]/35 shadow-[0_2px_8px_rgba(22,60,58,0.12),0_12px_28px_-4px_rgba(22,60,58,0.2),0_22px_44px_-12px_rgba(22,60,58,0.3)] -translate-y-1'
+                    : 'shadow-[0_1px_3px_rgba(22,60,58,0.05),0_6px_18px_-2px_rgba(22,60,58,0.1),0_16px_32px_-4px_rgba(22,60,58,0.06)] hover:-translate-y-1 hover:shadow-[0_3px_10px_rgba(22,60,58,0.1),0_16px_32px_-4px_rgba(22,60,58,0.18),0_24px_42px_-10px_rgba(22,60,58,0.16)]'
+                }`}
+                style={{
+                  borderColor: isSelected ? '#C99A4B' : 'rgba(22, 60, 58, 0.14)',
+                  background: isSelected ? 'linear-gradient(145deg, #163C3A 0%, #24596F 100%)' : '#FFFFFF',
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute -right-2 -top-5 font-serif text-8xl leading-none opacity-[0.1] select-none pointer-events-none"
+                  style={{ color: isSelected ? '#FFFFFF' : tone.color }}
+                >
+                  {card.number}
+                </span>
+                <span className="relative flex w-full items-center justify-between gap-3">
+                  <span className={`text-lg font-serif font-medium ${isSelected ? 'text-white' : 'text-[#163C3A]'}`}>
+                    {card.title}
+                  </span>
+                  <ArrowUpRight
+                    aria-hidden="true"
+                    className={`h-5 w-5 shrink-0 transition-transform ${isSelected ? 'rotate-45' : 'group-hover:translate-x-0.5 group-hover:-translate-y-0.5'}`}
+                    style={{ color: isSelected ? '#E6CBA6' : tone.color }}
+                  />
+                </span>
+                <span
+                  className="relative mt-5 flex items-center gap-2 text-xs uppercase tracking-wider font-semibold font-sans"
+                  style={{ color: isSelected ? '#E6CBA6' : tone.color }}
+                >
+                  {isSelected ? (
+                    <>
+                      <Spark className="h-4 w-4" /> Exploring
+                    </>
+                  ) : (
+                    'Open question'
+                  )}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+      {activeCard && (
+        <div
+          id={`${block.id}-answer`}
+          role="region"
+          aria-live="polite"
+          aria-labelledby={`${block.id}-answer-title`}
+          className="relative mt-4 overflow-hidden rounded-2xl border border-[#163C3A]/14 bg-gradient-to-br from-[#F7FAF9] via-white to-[#EEF4F7] p-6 sm:p-9 shadow-[0_1px_3px_rgba(22,60,58,0.05),0_8px_20px_-2px_rgba(22,60,58,0.12),0_18px_36px_-6px_rgba(22,60,58,0.1)] animate-memory"
+        >
+          <span
+            aria-hidden="true"
+            className="absolute -right-2 -top-8 font-serif text-[10rem] leading-none text-[#2F6F8F] opacity-[0.06] select-none pointer-events-none"
+          >
+            {activeCard.number}
+          </span>
+          <div className="relative max-w-3xl border-l-2 border-[#C99A4B] pl-5 sm:pl-7">
+            <p className="text-xs uppercase tracking-wider font-semibold text-[#24596F] font-sans">
+              Question {activeCard.number}
+            </p>
+            <h3 id={`${block.id}-answer-title`} className="text-xl sm:text-2xl font-serif mt-2 text-[#163C3A] font-normal">
+              {activeCard.title}
+            </h3>
+            <p className="mt-3 text-[#4A5568] leading-relaxed font-sans text-base">
+              {activeCard.text}
+            </p>
+          </div>
+        </div>
+      )}
+    </section>
   );
 };
 

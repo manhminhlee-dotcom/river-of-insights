@@ -17,6 +17,7 @@ export type BlockType =
   | 'filterGrid'
   | 'image'
   | 'callout'
+  | 'featureTriptych'
   | 'divider';
 
 export interface BaseBlock {
@@ -81,6 +82,17 @@ export interface NumberedCardsBlock extends BaseBlock {
     number: string;
     title: string;
     text: string;
+  }>;
+}
+
+export interface FeatureTriptychBlock extends BaseBlock {
+  type: 'featureTriptych';
+  title: string;
+  introduction?: string;
+  features: Array<{
+    number: string;
+    title: string;
+    description: string;
   }>;
 }
 
@@ -207,6 +219,7 @@ export type ContentBlock =
   | FilterGridBlock
   | ImageBlock
   | CalloutBlock
+  | FeatureTriptychBlock
   | DividerBlock;
 
 export interface Chapter {

@@ -95,20 +95,20 @@ export default function App() {
       return <JourneyPage initialChapterSlug={slug} />;
     }
 
-    // Canonical chapter pages
-    if (path === '/analytics-leadership') {
+    // Canonical and legacy chapter pages
+    if (path === '/analytics-leadership' || path === '/ch-7-leadership-dna') {
       return <ChapterPage slug="analytics-leadership" />;
     }
-    if (path === '/competing-on-analytics') {
+    if (path === '/competing-on-analytics' || path === '/ch-8-aligning-priorities') {
       return <ChapterPage slug="competing-on-analytics" />;
     }
-    if (path === '/analytics-leaders-playbook') {
+    if (path === '/analytics-leaders-playbook' || path === '/ch-9-first-90-days') {
       return <ChapterPage slug="analytics-leaders-playbook" />;
     }
-    if (path === '/making-it-happen') {
+    if (path === '/making-it-happen' || path === '/ch-10-steering-change') {
       return <ChapterPage slug="making-it-happen" />;
     }
-    if (path === '/common-pitfalls') {
+    if (path === '/common-pitfalls' || path === '/ch-11-navigating-pitfalls') {
       return <ChapterPage slug="common-pitfalls" />;
     }
 
